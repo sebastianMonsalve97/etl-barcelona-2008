@@ -1,0 +1,39 @@
+match_api_id,date,home_team_goal,away_team_goal,home_team_name,away_team_name
+530086,2008-08-31,1,0,CD Numancia,FC Barcelona
+530240,2008-11-08,6,0,FC Barcelona,Real Valladolid
+530252,2008-11-16,0,2,RC Recreativo,FC Barcelona
+530255,2008-11-23,1,1,FC Barcelona,Getafe CF
+530329,2008-11-29,0,3,Sevilla FC,FC Barcelona
+530337,2008-12-06,4,0,FC Barcelona,Valencia CF
+530343,2008-12-13,2,0,FC Barcelona,Real Madrid CF
+530358,2008-12-21,1,2,Villarreal CF,FC Barcelona
+530368,2009-01-03,3,1,FC Barcelona,RCD Mallorca
+530379,2009-01-11,2,3,CA Osasuna,FC Barcelona
+530450,2009-01-17,5,0,FC Barcelona,RC Deportivo de La Coruña
+530095,2008-09-13,1,1,FC Barcelona,Racing Santander
+530453,2009-01-24,4,1,FC Barcelona,CD Numancia
+530463,2009-02-01,1,2,Racing Santander,FC Barcelona
+530476,2009-02-08,3,1,FC Barcelona,Real Sporting de Gijón
+530483,2009-02-14,2,2,Real Betis Balompié,FC Barcelona
+530493,2009-02-21,1,2,FC Barcelona,RCD Espanyol
+530547,2009-03-01,4,3,Atlético Madrid,FC Barcelona
+530559,2009-03-07,2,0,FC Barcelona,Athletic Club de Bilbao
+530568,2009-03-15,0,2,UD Almería,FC Barcelona
+530580,2009-03-22,6,0,FC Barcelona,Málaga CF
+530591,2009-04-04,0,1,Real Valladolid,FC Barcelona
+530103,2008-09-21,1,6,Real Sporting de Gijón,FC Barcelona
+530602,2009-04-11,2,0,FC Barcelona,RC Recreativo
+530610,2009-04-18,0,1,Getafe CF,FC Barcelona
+530622,2009-04-22,4,0,FC Barcelona,Sevilla FC
+530628,2009-04-25,2,2,Valencia CF,FC Barcelona
+530640,2009-05-02,2,6,Real Madrid CF,FC Barcelona
+530652,2009-05-10,3,3,FC Barcelona,Villarreal CF
+530658,2009-05-17,2,1,RCD Mallorca,FC Barcelona
+530670,2009-05-23,0,1,FC Barcelona,CA Osasuna
+530681,2009-05-30,1,1,RC Deportivo de La Coruña,FC Barcelona
+530117,2008-09-24,3,2,FC Barcelona,Real Betis Balompié
+530128,2008-09-27,1,2,RCD Espanyol,FC Barcelona
+530133,2008-10-04,6,1,FC Barcelona,Atlético Madrid
+530210,2008-10-19,0,1,Athletic Club de Bilbao,FC Barcelona
+530219,2008-10-25,5,0,FC Barcelona,UD Almería
+530224,2008-11-01,1,4,Málaga CF,FC Barcelona

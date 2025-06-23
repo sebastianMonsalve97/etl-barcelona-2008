@@ -1,0 +1,342 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "7d267303-766e-4ee3-a385-955537b2b0b8",
+   "metadata": {},
+   "source": [
+    "## 1. Imports y loggings"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "230a71e9-7948-4384-b9d5-40b501dff45b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import sqlite3\n",
+    "import pandas as pd\n",
+    "import logging\n",
+    "import os\n",
+    "\n",
+    "#Crear carpetas de logs si no existe\n",
+    "os.makedirs(\"logs\", exist_ok = True)\n",
+    "\n",
+    "#Configurar logging\n",
+    "logging.basicConfig(\n",
+    "    filename = 'logs/proyecto.log',\n",
+    "    level = logging.INFO,\n",
+    "    format = '%(asctime)s - %(levelname)s - %(message)s')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "016c4ac2-5c43-4604-a99b-3ddc9ebc827e",
+   "metadata": {},
+   "source": [
+    "## 2. Extract"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "42cabc40-8d48-45f5-a8d9-be629e7eb988",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "   match_api_id                 date  home_team_goal  away_team_goal  \\\n",
+      "0        492473  2008-08-17 00:00:00               1               1   \n",
+      "1        492474  2008-08-16 00:00:00               0               0   \n",
+      "2        492475  2008-08-16 00:00:00               0               3   \n",
+      "3        492476  2008-08-17 00:00:00               5               0   \n",
+      "4        492477  2008-08-16 00:00:00               1               3   \n",
+      "\n",
+      "      home_team_name     away_team_name  \n",
+      "0           KRC Genk       Beerschot AC  \n",
+      "1   SV Zulte-Waregem   Sporting Lokeren  \n",
+      "2  KSV Cercle Brugge     RSC Anderlecht  \n",
+      "3           KAA Gent          RAEC Mons  \n",
+      "4      FCV Dender EH  Standard de Liège  \n"
+     ]
+    }
+   ],
+   "source": [
+    "def extract_match_data ():\n",
+    "    try: \n",
+    "        conn = sqlite3.connect (\"database.sqlite\")\n",
+    "        logging.info (\"Conexión establecida con la base de datos.\")\n",
+    "\n",
+    "        query = \"\"\"\n",
+    "        SELECT \n",
+    "            m.match_api_id, \n",
+    "            m.date, \n",
+    "            m.home_team_goal, \n",
+    "            m.away_team_goal,\n",
+    "            th.team_long_name AS home_team_name,\n",
+    "            ta.team_long_name AS away_team_name\n",
+    "        FROM Match m\n",
+    "        LEFT JOIN Team th ON m.home_team_api_id = th.team_api_id\n",
+    "        LEFT JOIN Team ta ON m.away_team_api_id = ta.team_api_id\n",
+    "        \"\"\"\n",
+    "\n",
+    "        df = pd.read_sql_query (query, conn)\n",
+    "        conn.close()\n",
+    "        logging.info(f\"Extracción exitosa. Registros obtenidos: {len (df)}\")\n",
+    "        return df\n",
+    "\n",
+    "    except Exception as e:\n",
+    "        logging.error (f\"Error en la extracción de datos {e}\")\n",
+    "        return pd.DataFrame () \n",
+    "\n",
+    "#Probar la conexión\n",
+    "if __name__ == \"__main__\":\n",
+    "    df = extract_match_data ()\n",
+    "    print (df.head())\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d9642a75-1c65-468e-9902-6f02e5bab0d6",
+   "metadata": {},
+   "source": [
+    "## 3. Trasnformación"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "20198727-f667-4a5d-8c65-10b78943c458",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def transform_data(df):\n",
+    "    try:\n",
+    "        #Asegurarse que la columna 'date' sea de tipo datetime\n",
+    "        df['date'] = pd.to_datetime(df['date'])\n",
+    "\n",
+    "        #Filtrar los datos donde Barcelona jugó como visitante o local\n",
+    "        df = df[\n",
+    "            (df['home_team_name'].str.contains(\"Barcelona\", na=False)) |\n",
+    "            (df['away_team_name'].str.contains(\"Barcelona\", na=False))\n",
+    "        ]\n",
+    "\n",
+    "        #Filtrar solo temporada 2008-2009\n",
+    "        df = df[(df['date'] >= '2008-07-01') & (df['date'] <= '2009-06-30')]\n",
+    "\n",
+    "        # Eliminar registros nullos\n",
+    "        df = df.dropna ()\n",
+    "\n",
+    "        #Control de calidad\n",
+    "        if df.empty:\n",
+    "            logging.warning(\"⚠️ El dataframe resultante esta vacio luego de la validación.\")\n",
+    "        else:\n",
+    "            logging.info(\"f✅ Tranfsoramción completada. Registros finales: {len(df)}\")\n",
+    "\n",
+    "        return df\n",
+    "\n",
+    "        logging.info (f\"Transformación completada. Registros finales: {len (df)}\")\n",
+    "        return df\n",
+    "\n",
+    "    except Exception as e:\n",
+    "        logging.error (f\"Error durante la transformación: {e}\")\n",
+    "        return df"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "904eab4c-e89b-469c-9ecf-cebcb4919757",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "       match_api_id       date  home_team_goal  away_team_goal home_team_name  \\\n",
+      "21520        530086 2008-08-31               1               0    CD Numancia   \n",
+      "21534        530240 2008-11-08               6               0   FC Barcelona   \n",
+      "21546        530252 2008-11-16               0               2  RC Recreativo   \n",
+      "21549        530255 2008-11-23               1               1   FC Barcelona   \n",
+      "21563        530329 2008-11-29               0               3     Sevilla FC   \n",
+      "\n",
+      "        away_team_name  \n",
+      "21520     FC Barcelona  \n",
+      "21534  Real Valladolid  \n",
+      "21546     FC Barcelona  \n",
+      "21549        Getafe CF  \n",
+      "21563     FC Barcelona  \n"
+     ]
+    }
+   ],
+   "source": [
+    "df = extract_match_data ()\n",
+    "df_transformado = transform_data(df)\n",
+    "print (df_transformado.head())"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ff3da85f-caf7-4a65-a85c-c762467b0996",
+   "metadata": {},
+   "source": [
+    "## 4. Load"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "fd780c69-486a-4d8a-a49f-51be51346c23",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def load_data (df, output_path = \"data/barcelona_2008_2009.csv\"):\n",
+    "    try: \n",
+    "        #Crear la carpeta 'data' si no existe\n",
+    "        os.makedirs (\"data\", exist_ok = True)\n",
+    "\n",
+    "        #Guardar dataframe como archivo CSV\n",
+    "        df.to_csv (output_path, index = False)\n",
+    "        logging.info (f\"Archivo CSV guardado exitosamente en: {output_path}\")\n",
+    "        print (f\"✅ Archivo guardado en: {output_path}\")\n",
+    "\n",
+    "    except Exception as e:\n",
+    "        logging.error (f\"Error al guardar archivo CSV: {e}\")\n",
+    "        print (\"❌ Ocurrió un error al guardar el archivo.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "476e60e7-868a-433e-9c4e-c1877d00a22b",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "✅ Archivo guardado en: data/barcelona_2008_2009.csv\n"
+     ]
+    }
+   ],
+   "source": [
+    "if __name__ == \"__main__\":\n",
+    "    df_raw = extract_match_data()\n",
+    "    df_clean = transform_data(df_raw)\n",
+    "    load_data(df_clean)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "1569edd2-c6b1-4ac2-82fb-d2984ee39b50",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "4baec7b9-2cef-4228-81d9-b51c14a08029",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "9b4c41a3-79e6-42e6-bac9-fd285dbba9a6",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "fb3489c6-3cb3-4a71-a162-072e30ae4fea",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e91b005d-66e2-4946-a013-bf42cca00f74",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e1177b59-7ac6-41ec-b1fd-6aef06e537a4",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "32fddf82-607c-4c92-a825-b0b7c9ba3f60",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "82ca6c35-129e-4029-b2ac-2b1031ec3cef",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "96c27bbe-c6f3-43f8-97d7-8c33ae40cff8",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "17707271-41a7-428d-b203-f863f903f398",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "4189729a-0c51-4c4d-b653-795b255450d1",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python [conda env:base] *",
+   "language": "python",
+   "name": "conda-base-py"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.12.7"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

@@ -1,0 +1,27 @@
+2025-06-15 20:54:32,544 - INFO - Conexión establecida con la base de datos.
+2025-06-15 20:54:32,545 - ERROR - Error en la extracción de datos: Execution failed on sql '
+        SELECT 
+            m.match_api_id, 
+            m.date, 
+            m.home_team_goal, 
+            m.away_team_goal,
+            th.team_long_name AS home_team_name,
+            ta.team_long_name AS away_team_name
+        FROM Match m
+        LEFT JOIN Team th ON m.home_team_api_id = th.team_api_id
+        LEFT JOIN Team ta ON m.away_team_api_id = ta.team_api_id
+        ': no such table: Match
+2025-06-15 20:54:32,546 - INFO - Conexión establecida con la base de datos.
+2025-06-15 20:54:32,546 - ERROR - Error en la extracción de datos: Execution failed on sql '
+        SELECT 
+            m.match_api_id, 
+            m.date, 
+            m.home_team_goal, 
+            m.away_team_goal,
+            th.team_long_name AS home_team_name,
+            ta.team_long_name AS away_team_name
+        FROM Match m
+        LEFT JOIN Team th ON m.home_team_api_id = th.team_api_id
+        LEFT JOIN Team ta ON m.away_team_api_id = ta.team_api_id
+        ': no such table: Match
+2025-06-15 20:54:32,546 - ERROR - ❌ Error durante la transformación: 'date'
